@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .post {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .post:last-child {
+            border-bottom: none;
+        }
+        .post a {
+            text-decoration: none;
+            font-size: 18px;
+            color: #007bff;
+        }
+        .post a:hover {
+            text-decoration: underline;
+        }
+        .post .meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .actions {
+            margin-top: 10px;
+        }
+        .actions form {
+            display: inline;
+            margin-right: 5px;
+        }
+        .actions button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .actions button.dislike {
+            background-color: #dc3545;
+        }
+        .actions button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Forum</h1>
+    <a href="/profile">Profile</a>
+    <div class="container">
+        {{range .}}
+        <div class="post">
+            <a href="/post?id={{.ID}}">{{.Title}}</a>
+            <div class="meta">
+                Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
+            </div>
+
+        </div>
+        {{end}}
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+        <a href="/new-post">Add New Post</a>
+    </div>
+</body>
+</html>

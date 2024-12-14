@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile</title>
+    <style>
+        /* Basic styling for the profile page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: right;
+        }
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .profile-info {
+            margin-bottom: 20px;
+        }
+        .profile-info h2 {
+            margin-top: 0;
+        }
+        .logout-button {
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #c0392b;
+        }
+        .login-message {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 50px;
+        }
+        .login-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .login-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/">Home</a>
+        <a href="/profile">Profile</a>
+        <form action="/logout" method="POST" style="display:inline;">
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
+    </div>
+
+    <div class="container">
+        {{if .IsLoggedIn}}
+        <div class="profile-info">
+            <h1>Profile Header</h1>
+            <h2>Welcome, {{.Username}}!</h2>
+            <p><strong>Email:</strong> {{.Email}}</p>
+            <p><strong>Member Since:</strong> 2020</p>
+        </div>
+        {{else}}
+        <div class="login-message">
+            <h2>You are not logged in!</h2>
+            <a href="/login" class="login-button">Go to Login</a>
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>

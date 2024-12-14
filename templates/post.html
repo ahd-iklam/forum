@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Post.Title}}</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{.Post.Title}}</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                color: #333;
+            }
+           .header {
+            background-color: #007bff ;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+    
+            .container {
+                max-width: 80%;
+                margin: 20px auto;
+                padding: 20px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+    
+            h1 {
+                color: #444;
+                font-size: 2rem;
+                margin-bottom: 10px;
+            }
+    
+            p {
+                font-size: 1.1rem;
+                color: #555;
+            }
+    
+            h3 {
+                margin-top: 30px;
+                font-size: 1.5rem;
+                color: #333;
+            }
+    
+            ul {
+                list-style: none;
+                padding: 0;
+            }
+    
+            ul li {
+                padding: 10px;
+                background: #f9f9f9;
+                border: 1px solid #ddd;
+                margin-bottom: 10px;
+                border-radius: 4px;
+            }
+    
+            ul li:nth-child(odd) {
+                background: #efefef;
+            }
+    
+            form {
+                margin-top: 20px;
+            }
+    
+            textarea {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                resize: vertical;
+            }
+    
+            button {
+                display: inline-block;
+                padding: 10px 15px;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+            }
+    
+            button:hover {
+                background-color: #0056b3;
+            }
+    
+            a {
+                display: inline-block;
+                margin-top: 20px;
+                text-decoration: none;
+                color: #007bff;
+                font-size: 1rem;
+            }
+    
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+</head>
+<body>
+    <head>
+        <h1 class="header">Welcome to the Forum</h1>
+    </head>
+    <div class="container">
+        <p><strong>Posted on:</strong> {{.Post.CreatedAt}} | <strong>Category:</strong> {{.Post.CategoryName}}  | <strong>Created By:</strong> {{.Post.Username}}</p>
+        <h1>{{.Post.Title}}</h1>
+        <p></p>
+        <p>{{.Post.Content}}</p>
+
+        <!-- Like/Dislike Buttons -->
+        <form method="POST" action="/like">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <input type="hidden" name="user_id" value="{{.User.ID}}">
+            <button type="submit" name="action" value="like">Like</button>
+        </form>
+        <form method="POST" action="/dislike">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <input type="hidden" name="user_id" value="{{.User.ID}}">
+            <button type="submit" name="action" value="dislike">Dislike</button>
+        </form>
+
+        <h3>Comments</h3>
+        <ul>
+            {{range .Comments}}
+                <li><strong>{{.Username}}:</strong> {{.Content}} (Posted on: {{.CreatedAt}})</li>
+            {{else}}
+                <li>No comments yet.</li>
+            {{end}}
+        </ul>
+
+        <!-- Add Comment Form -->
+        <form action="/add-comment" method="POST">
+            <input type="hidden" name="post_id" value="{{.Post.ID}}">
+            <textarea name="comment" placeholder="Add your comment" required></textarea>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+
+        <a href="/">Back to Home</a>
+    </div>
+</body>
+
+
+
+</html>
+
+</html>
