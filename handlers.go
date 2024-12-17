@@ -59,86 +59,6 @@ SELECT
 	}
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	postID := r.URL.Query().Get("id")
-	if postID == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
-		return
-	}
-
-	var post Post
-	err := db.QueryRow(`
-        SELECT 
-            posts.id, 
-            posts.title, 
-            posts.content, 
-            posts.created_at, 
-            category.name AS category_name,
-            users.username AS Username
-        FROM posts
-        LEFT JOIN post_category ON posts.id = post_category.post_id
-        LEFT JOIN category ON post_category.catego_id = category.id
-        INNER JOIN users ON posts.id_users = users.id
-        WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.CategoryName, &post.Username)
-	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
-		return
-	}
-
-	// Fetch comments related to this post
-	rows, err := db.Query(`
-        SELECT comments.content, comments.created_at, users.username
-        FROM comments
-        JOIN users ON comments.user_id = users.id
-        WHERE comments.post_id = ?
-        ORDER BY comments.created_at ASC`, postID)
-	if err != nil {
-		http.Error(w, "Error fetching comments", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	var comments []struct {
-		Content   string
-		CreatedAt string
-		Username  string
-	}
-	for rows.Next() {
-		var comment struct {
-			Content   string
-			CreatedAt string
-			Username  string
-		}
-		if err := rows.Scan(&comment.Content, &comment.CreatedAt, &comment.Username); err != nil {
-			continue
-		}
-		comments = append(comments, comment)
-	}
-
-	// Assuming you already have user information available (from cookie or session)
-	userID := 1 // Retrieve userID from the session or cookie
-
-	// Pass the post, comments, and user info to the template
-	data := struct {
-		Post     Post
-		Comments []struct {
-			Content   string
-			CreatedAt string
-			Username  string
-		}
-		User struct {
-			ID int
-		}
-	}{
-		Post:     post,
-		Comments: comments,
-		User:     struct{ ID int }{ID: userID},
-	}
-
-	tmpl := template.Must(template.ParseFiles("templates/post.html"))
-	tmpl.Execute(w, data)
-}
-
 func newPostHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("templates/new_post.html"))
 	tmpl.Execute(w, nil)
@@ -277,7 +197,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func getUserId(username string) allInfos {

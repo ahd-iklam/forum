@@ -37,9 +37,8 @@ func main() {
 	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/post", postHandler)
 	http.HandleFunc("/add-comment", addCommentHandler)
-	http.HandleFunc("/like-post", likePostHandler)
-	http.HandleFunc("/dislike-post", dislikePostHandler)
 	http.HandleFunc("/profile", profileHandler)
+	http.HandleFunc("/comment-reaction", commentReactionHandler)
 
 	http.HandleFunc("/userID?id=%"+info.userIdAsstring, profileHander)
 
