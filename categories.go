@@ -111,6 +111,7 @@ func categoryPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type PostData struct {
+		ID           int
 		Title        string
 		CreatedAt    string
 		Username     string
@@ -123,6 +124,7 @@ func categoryPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	query := `
         SELECT 
+            p.id,
             p.title, 
             p.created_at, 
             u.username,
@@ -148,7 +150,7 @@ func categoryPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var post PostData
-		if err := rows.Scan(&post.Title, &post.CreatedAt, &post.Username, &post.CommentCount, &post.LikeCount, &post.DislikeCount); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.CreatedAt, &post.Username, &post.CommentCount, &post.LikeCount, &post.DislikeCount); err != nil {
 			http.Error(w, "Error processing posts", http.StatusInternalServerError)
 			log.Println("Error scanning post data:", err)
 			return

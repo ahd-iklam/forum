@@ -74,7 +74,7 @@
     <div class="posts">
         {{range .}}
         <div class="post">
-            <h2>{{.Title}}</h2>
+            <h2><a href="/post?id={{.ID}}">{{.Title}}</a></h2>
             <p>Posted on: {{.CreatedAt}} by {{.Username}}</p>
             <p>Likes: {{.LikeCount}}, Dislikes: {{.DislikeCount}}, Comments: {{.CommentCount}}</p>
         </div>
