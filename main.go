@@ -38,6 +38,9 @@ func main() {
 	http.HandleFunc("/post", postHandler)
 	http.HandleFunc("/add-comment", addCommentHandler)
 	http.HandleFunc("/profile", profileHandler)
+	http.HandleFunc("/categories", categoriesHandler)
+	http.HandleFunc("/category-posts", categoryPostsHandler)
+
 	http.HandleFunc("/comment-reaction", commentReactionHandler)
 
 	http.HandleFunc("/userID?id=%"+info.userIdAsstring, profileHander)

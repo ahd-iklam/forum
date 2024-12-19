@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .post {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .post:last-child {
+            border-bottom: none;
+        }
+        .post h2 {
+            font-size: 20px;
+            color: #007bff;
+            margin: 0;
+        }
+        .post h2:hover {
+            text-decoration: underline;
+        }
+        .post p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .no-posts {
+            text-align: center;
+            font-size: 16px;
+            color: #888;
+            padding: 20px 0;
+        }
+        nav {
+            background-color: #007bff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Posts in Category</h1>
+    <div class="posts">
+        {{range .}}
+        <div class="post">
+            <h2>{{.Title}}</h2>
+            <p>Posted on: {{.CreatedAt}} by {{.Username}}</p>
+            <p>Likes: {{.LikeCount}}, Dislikes: {{.DislikeCount}}, Comments: {{.CommentCount}}</p>
+        </div>
+        {{else}}
+        <p>No posts found in this category.</p>
+        {{end}}
+    </div>
+</body>
+</html>

@@ -70,22 +70,23 @@
         }
     </style>
 </head>
-<body>
-    <h1>Welcome to the Forum</h1>
+<h1>Welcome to the Forum</h1>
+<nav>
     <a href="/profile">Profile</a>
-    <div class="container">
-        {{range .}}
-        <div class="post">
-            <a href="/post?id={{.ID}}">{{.Title}}</a>
-            <div class="meta">
-                Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
-            </div>
-
+    <a href="/categories">Categories</a> <!-- New Categories Button -->
+</nav>
+<div class="container">
+    {{range .}}
+    <div class="post">
+        <a href="/post?id={{.ID}}">{{.Title}}</a>
+        <div class="meta">
+            Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
         </div>
-        {{end}}
     </div>
-    <div style="text-align:center; margin-top:20px;">
-        <a href="/new-post">Add New Post</a>
-    </div>
-</body>
+    {{end}}
+</div>
+<div style="text-align:center; margin-top:20px;">
+    <a href="/new-post">Add New Post</a>
+</div>
+
 </html>

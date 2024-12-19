@@ -254,40 +254,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func addCommentHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-	cookie, err := r.Cookie("userId")
-	if err != nil {
-		// For any other error, return bad request
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	userIdStr := cookie.Value
-	userID, err := strconv.Atoi(userIdStr)
-	postID := r.FormValue("post_id")
-	commentContent := r.FormValue("comment")
-
-	if postID == "" || commentContent == "" || userID == 0 {
-		http.Error(w, "Invalid comment or user", http.StatusBadRequest)
-		return
-	}
-
-	_, erro := db.Exec(`
-        INSERT INTO comments (content, post_id, user_id)
-        VALUES (?, ?, ?)`, commentContent, postID, userID)
-	if erro != nil {
-		http.Error(w, "Error adding comment", http.StatusInternalServerError)
-		return
-	}
-
-	// Redirect back to the post page after adding the comment
-	http.Redirect(w, r, "/post?id="+postID, http.StatusFound)
-}
-
 func profileHander(w http.ResponseWriter, r *http.Request) {
 
 }
