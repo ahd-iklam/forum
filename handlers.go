@@ -11,24 +11,30 @@ import (
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	isLoggedIn := false
+	cookie, err := r.Cookie("userId")
+	if err == nil && cookie != nil {
+		isLoggedIn = true
+	}
+
 	rows, err := db.Query(`
-SELECT 
-	posts.id,
-    posts.title, 
-    posts.created_at, 
-    users.username, 
-    category.name, 
-    COALESCE(COUNT(comments.content), 0) AS comment_count,
-    COALESCE(SUM(CASE WHEN postreaction.action = 'like' THEN 1 ELSE 0 END), 0) AS post_likes,
-    COALESCE(SUM(CASE WHEN postreaction.action = 'dislike' THEN 1 ELSE 0 END), 0) AS post_dislikes
-	FROM posts
-	INNER JOIN users ON posts.id_users = users.id
-	INNER JOIN post_category ON posts.id = post_category.post_id
-	INNER JOIN category ON post_category.catego_id = category.id
-	LEFT JOIN comments ON posts.id = comments.post_id
-	LEFT JOIN postreaction ON postreaction.post_id = posts.id
-	GROUP BY posts.id
-	ORDER BY posts.created_at DESC;
+    SELECT 
+        posts.id,
+        posts.title, 
+        posts.created_at, 
+        users.username, 
+        category.name, 
+        COALESCE(COUNT(comments.content), 0) AS comment_count,
+        COALESCE(SUM(CASE WHEN postreaction.action = 'like' THEN 1 ELSE 0 END), 0) AS post_likes,
+        COALESCE(SUM(CASE WHEN postreaction.action = 'dislike' THEN 1 ELSE 0 END), 0) AS post_dislikes
+    FROM posts
+    INNER JOIN users ON posts.id_users = users.id
+    INNER JOIN post_category ON posts.id = post_category.post_id
+    INNER JOIN category ON post_category.catego_id = category.id
+    LEFT JOIN comments ON posts.id = comments.post_id
+    LEFT JOIN postreaction ON postreaction.post_id = posts.id
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC;
     `)
 	if err != nil {
 		log.Println("error in querying posts:", err)
@@ -53,8 +59,16 @@ SELECT
 		return
 	}
 
+	data := struct {
+		Posts      []Post
+		IsLoggedIn bool
+	}{
+		Posts:      posts,
+		IsLoggedIn: isLoggedIn,
+	}
+
 	tmpl := template.Must(template.ParseFiles("templates/home.html"))
-	if err := tmpl.Execute(w, posts); err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		log.Println("Error rendering template:", err)
 	}
 }

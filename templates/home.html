@@ -15,7 +15,7 @@
         .header {
         width: 100%; 
         height: 500px; 
-        background-image: url('https://previews.dropbox.com/p/thumb/ACfH-6IO67L-DHXkdyS9XimQFatwSeEOdZ7EnwTWyT2LWFOUS_NMD9VswsRb5Ar-KulQeC5FcaUUYq5h--3LgZUMRLqy7RDRosCbIc9QpwR9JGn0A0X_FXSJ-y19FyQO5e1BxM-fVwhpGRfLlJmZ5hVbU_jm2CIW_9hVbOn3_0dsl7xEYu5hePj5qJCW4OvHi6YVPyEvW7JXYuErcJ89eeNS9334r1o3KXYxy6rtWIFHxu9l62dZ5IsEaoGFZkmJNbRA2EV9jMve7VK8ghyErlHJ7TbPoiVK9QGuFIPob8DzR-xcz_Fv5DbDsBFQ2CMWBH-ZMinMkE4S0pR9BbnwHmsA/p.png?is_prewarmed=true'); 
+        background-image: url('https://primorecipe.com/wp-content/uploads/2024/12/HeaderTitle-1.png'); 
         background-size: cover; 
         background-position: center; 
         background-repeat: no-repeat; 
@@ -28,7 +28,7 @@
         }
 
         .logo img {
-            height: 100px; 
+            height: 200px; 
             width: 100px; 
             object-fit: cover; 
         }
@@ -78,46 +78,55 @@
             color: #888;
             margin-top: 5px;
         }
-        .actions {
-            margin-top: 10px;
-        }
-        .actions form {
-            display: inline;
-            margin-right: 5px;
-        }
-        .actions button {
-            background-color: #007bff;
-            color: white;
+        .add-post-container {
+            background-color: #f4922c;
+            width: 300px;
+            margin: 20px auto;
+            text-align: center;
+            font-size: 16px;
+            padding: 10px 15px;
             border: none;
-            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .add-post-container a {
+            color: white;
+            text-decoration: none;
             font-size: 14px;
+            display: inline-block;
+            margin-top: 15px;
+            transition: color 0.3s;
         }
-        .actions button.dislike {
-            background-color: #dc3545;
+        .not-regestred  a {
+            background-color: none;
+            color: #f4922c;
+            
         }
-        .actions button:hover {
-            opacity: 0.8;
-        }
+        
+
     </style>
 </head>
 <body>
     <div class="header">
         <div class="nav-container">
             <div class="logo" style="height: 100px; width: 100px;">
-            <img src="https://previews.dropbox.com/p/thumb/ACcgWsCVoH8vWQCRcS9fJSdpnLN9bAWBmbg1QBL7GloAyeAw3zi5n0GCKhpxcYNq0MueerLB9sXgYbJLhJcpAdx50-w5-stVRlj59WEwH3JuTZnMJfTz5avdFpcDENFF7q2rUElyYUnPsIHL47Gjg9ooXxQE9kvBun08zTH2fypd1l0W_Q5BdBfZ3FThJo2eTj273_0FG3I8A5fnE41GZwxLfQeoAFGon3ZBwjJMxp9UlxnAU1roezV_dYkhu7RSu59DHHHuhk1SeSmTflcAgJ1-84Em8LNBJFkw2LZvDwrMgW4aKcdD6apRU-MiuEBtPYf6HZg5K9_8XBMDr-X7Le1-/p.png?is_prewarmed=true" alt="">
-        </div>
-        <nav class="navbar">
-            <a href="/profile">Profile</a>
-            <a href="/categories">Categories</a> <!-- New Categories Button -->
-        </nav>
+                <a href="/">
+                    <img src="https://primorecipe.com/wp-content/uploads/2024/12/s__1_-removebg-preview.png" alt="">
+                </a>
+            </div>
+            <nav class="navbar">
+                <a href="/profile">Profile</a>
+                <a href="/categories">Categories</a>
+                <a href="/register">Register</a>
+                <a href="/login">Login</a>
+            </nav>
         </div>
 
     </div>
 
     <div class="container">
-        {{range .}}
+        {{range .Posts}}
         <div class="post">
             <a href="/post?id={{.ID}}">{{.Title}}</a>
             <div class="meta">
@@ -126,8 +135,14 @@
         </div>
         {{end}}
     </div>
-    <div style="text-align:center; margin-top:20px;">
+    <div class="add-post-container">
+        {{if .IsLoggedIn}}
         <a href="/new-post">Add New Post</a>
+        {{else}}
+        <p class="not-regestred"><a href="http://localhost:8080/register">Register</a> to add a new posts.</p>
+        {{end}}
+    
     </div>
+    
 </body>
 </html>
