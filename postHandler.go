@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 )
 
 func checkrpdb(postid string, userid int, action string) bool {
@@ -59,10 +57,14 @@ func insertReaction(postid string, userid int, action string) error {
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
-
 	postID := r.URL.Query().Get("id")
+	if postID == "" {
+		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		return
+	}
+
 	var post Post
-	// Query to get post details along with category name and username
+	// Fetch the post details
 	err := db.QueryRow(`
         SELECT 
             posts.id, 
@@ -71,24 +73,26 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
             posts.created_at, 
             category.name AS category_name,
             users.username AS Username
-            FROM posts
-            LEFT JOIN post_category ON posts.id = post_category.post_id
-            LEFT JOIN category ON post_category.catego_id = category.id
-            INNER JOIN users ON posts.id_users = users.id
-            WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.CategoryName, &post.Username)
+        FROM posts
+        LEFT JOIN post_category ON posts.id = post_category.post_id
+        LEFT JOIN category ON post_category.catego_id = category.id
+        INNER JOIN users ON posts.id_users = users.id
+        WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.CategoryName, &post.Username)
+
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
 
+	// Fetch comments
 	rows, err := db.Query(`
-    SELECT comments.id, comments.content, comments.created_at, users.username,
-           (SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'like') AS like_count,
-           (SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'dislike') AS dislike_count
-    FROM comments 
-    JOIN users ON comments.user_id = users.id
-    WHERE comments.post_id = ?
-    ORDER BY comments.created_at ASC`, postID)
+        SELECT comments.id, comments.content, comments.created_at, users.username,
+        COALESCE((SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'like'), 0) AS like_count,
+        COALESCE((SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'dislike'), 0) AS dislike_count
+        FROM comments 
+        JOIN users ON comments.user_id = users.id
+        WHERE comments.post_id = ?
+        ORDER BY comments.created_at ASC`, postID)
 
 	if err != nil {
 		http.Error(w, "Error fetching comments", http.StatusInternalServerError)
@@ -96,11 +100,6 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// var comments []struct {
-	// 	Content   string
-	// 	CreatedAt string
-	// 	Username  string
-	// }
 	var comments []struct {
 		ID           int
 		Content      string
@@ -122,9 +121,16 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		if err := rows.Scan(&comment.ID, &comment.Content, &comment.CreatedAt, &comment.Username, &comment.LikeCount, &comment.DislikeCount); err != nil {
 			continue
 		}
-
 		comments = append(comments, comment)
 	}
+
+	// Determine if the user is logged in
+	isLoggedIn := false
+	cookie, err := r.Cookie("userId")
+	if err == nil && cookie != nil {
+		isLoggedIn = true
+	}
+
 	data := struct {
 		Post     Post
 		Comments []struct {
@@ -135,81 +141,12 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 			LikeCount    int
 			DislikeCount int
 		}
+		IsLoggedIn bool
 	}{
-		Post:     post,
-		Comments: comments,
+		Post:       post,
+		Comments:   comments,
+		IsLoggedIn: isLoggedIn,
 	}
-	if postID == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
-		return
-	}
-
-	// Fetch like/dislike counts
-	err = db.QueryRow(`
-        SELECT COUNT(*) FROM postreaction WHERE post_id = ? AND action = 'like'`, postID).Scan(&post.LikeCount)
-	if err != nil {
-		post.LikeCount = 0
-	}
-
-	err = db.QueryRow(`
-        SELECT COUNT(*) FROM postreaction WHERE post_id = ? AND action = 'dislike'`, postID).Scan(&post.DislikeCount)
-	if err != nil {
-		post.DislikeCount = 0
-	}
-	cookie, err := r.Cookie("userId")
-	if err != nil {
-		// For any other error, return bad request
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	userIdStr := cookie.Value
-	userID, err := strconv.Atoi(userIdStr)
-	// Handle Like/Dislike action
-	if r.Method == http.MethodPost {
-		action := r.FormValue("action")
-
-		// Validate action
-		if action != "like" && action != "dislike" {
-			http.Error(w, "Invalid action", http.StatusBadRequest)
-			return
-		}
-
-		if checkrpdb(postID, userID, action) {
-			fmt.Println("sdfsdfsdfsd")
-			tmpls := template.Must(template.ParseFiles("templates/post.html"))
-			tmpls.Execute(w, data)
-			return
-		}
-
-		// Insert reaction into the database (ignores duplicates for same post/user)
-		_, err := db.Exec(`
-            INSERT INTO postreaction (post_id, user_id, action)
-            VALUES (?, ?, ?)`,
-			postID, userID, action)
-		fmt.Println(postID, userID, action, "dddfd")
-		if err != nil {
-			http.Error(w, "Error saving reaction", http.StatusInternalServerError)
-			return
-		}
-
-		// Refresh the like/dislike counts
-		err = db.QueryRow(`
-            SELECT COUNT(*) FROM postreaction WHERE post_id = ? AND action = 'like'`, postID).Scan(&post.LikeCount)
-		if err != nil {
-			post.LikeCount = 0
-		}
-
-		err = db.QueryRow(`
-            SELECT COUNT(*) FROM postreaction WHERE post_id = ? AND action = 'dislike'`, postID).Scan(&post.DislikeCount)
-		if err != nil {
-			post.DislikeCount = 0
-		}
-	}
-
-	// Fetch comments related to this post
-
-	// Prepare data to pass to the template
 
 	tmpl := template.Must(template.ParseFiles("templates/post.html"))
 	tmpl.Execute(w, data)
