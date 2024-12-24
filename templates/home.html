@@ -125,6 +125,59 @@
 
     </div>
 
+        <div class="filter">
+
+            <form action="/filterPosts" method="GET">
+                <fieldset>
+                    <legend>Filter Posts</legend>
+                                        <label for="category">Filter by Category:</label>
+                    <div id="category">
+                        <label>
+                            <input type="checkbox" name="category" value="tech">
+                            Technology
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="health">
+                            Health
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="travel">
+                            Travel
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="sports">
+                            Sports
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="gaming">
+                            Gaming
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="food">
+                            Food
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="science">
+                            Science
+                        </label>
+                        <label>
+                            <input type="checkbox" name="category" value="fashion">
+                            Fashion
+                        </label>
+                    </div>
+                    
+                    <label for="appt">Filter by Created Time:</label>
+                    <input type="time" id="appt" name="appt">
+            
+                    <label for="likes">Filter by Number of Likes:</label>
+                    <input type="number" id="likes" name="likes" min="0" placeholder="Enter minimum likes">
+                    
+                    <input type="submit" value="Filter">
+                </fieldset>
+            </form>
+            
+    </div>
+
     <div class="container">
         {{range .Posts}}
         <div class="post">
