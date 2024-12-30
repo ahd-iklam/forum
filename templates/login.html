@@ -154,6 +154,13 @@ a:hover {
     </div>
     <div class="container" >
             <h1>Login</h1>
+            {{if .IsLoggedIn}}
+        <div class="container">
+            <h1>You are already logged in!</h1>
+            <p>It seems like you are already logged in to your account.</p>
+            <a href="/" class="button">Go to Home Page</a>
+        </div>
+           {{else}}
     <form action="/login" method="POST">
         <label for="username">Username:</label>
         <input type="text" name="username" id="username" required>
@@ -164,6 +171,7 @@ a:hover {
         <button type="submit">Login</button>
     </form>
     <a href="/register">You still don't have an account? Create one here.</a>
+    {{end}}
     </div>
 
 </body>

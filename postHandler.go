@@ -84,7 +84,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch comments
+	// fetching comments related to a specific post:y
 	rows, err := db.Query(`
         SELECT comments.id, comments.content, comments.created_at, users.username,
         COALESCE((SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'like'), 0) AS like_count,
@@ -124,7 +124,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		comments = append(comments, comment)
 	}
 
-	// Determine if the user is logged in
+	// check if the user is already logged in or not based on the cookie if the cookie is nil so there is no logged in user
 	isLoggedIn := false
 	cookie, err := r.Cookie("userId")
 	if err == nil && cookie != nil {

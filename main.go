@@ -34,25 +34,18 @@ func main() {
 	http.HandleFunc("/add-post", addPostHandler)
 	http.HandleFunc("/new-post", newPostHandler)
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/post", postHandler)
 	http.HandleFunc("/add-comment", addCommentHandler)
 	http.HandleFunc("/profile", profileHandler)
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/category-posts", categoryPostsHandler)
-
 	http.HandleFunc("/comment-reaction", commentReactionHandler)
-
-	http.HandleFunc("/userID?id=%"+info.userIdAsstring, profileHander)
-
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-//		if err := tmpl.Execute(w, posts); err != nil {
-//			log.Println("Error rendering template:", err)
-//		}
-//	}
 func profileHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the userId from the cookie
 	cookie, err := r.Cookie("userId")

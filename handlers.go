@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -214,27 +213,19 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
-func getUserId(username string) allInfos {
-	var infos allInfos
-
-	// QueryRow returns a row, we need to scan the result
-	err := db.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&infos.userId)
-	if err != nil {
-		// Handle error (possibly no rows found or other errors)
-		return infos // return empty infos on error
-	}
-	fmt.Println(info.userIdAsstring, "tsting")
-	// Continue processing if no error
-	return infos
-}
-
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if the user is already logged in
+	cookie, err := r.Cookie("userId")
+	isLoggedIn := err == nil && cookie != nil
+
 	if r.Method == http.MethodGet {
+		// Pass the isLoggedIn variable to the template
 		tmpl := template.Must(template.ParseFiles("templates/login.html"))
-		tmpl.Execute(w, nil)
+		tmpl.Execute(w, map[string]bool{"IsLoggedIn": isLoggedIn})
 		return
 	}
 
+	// Process login form submission
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if username == "" || password == "" {
@@ -245,13 +236,14 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	var storedPassword string
 	var userId string
 
-	err := db.QueryRow("SELECT password, id FROM users WHERE username = ?", username).Scan(&storedPassword, &userId)
+	err = db.QueryRow("SELECT password, id FROM users WHERE username = ?", username).Scan(&storedPassword, &userId)
 	if err != nil || storedPassword != password {
 		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
 		return
 	}
 
-	cookie := &http.Cookie{
+	// Create a cookie to log the user in
+	cookie = &http.Cookie{
 		Name:     "userId",
 		Value:    userId,
 		Path:     "/",                             // Cookie is valid for the entire site
@@ -262,12 +254,18 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	info = getUserId(username)
-	// fmt.Println(info.userId, "this is a new user")
-
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func profileHander(w http.ResponseWriter, r *http.Request) {
-
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:     "userId",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1, // Immediately expires
+	}
+	http.SetCookie(w, cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

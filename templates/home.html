@@ -51,6 +51,10 @@
             color: #007BFF; 
         }
         .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            align-items: center;
+            column-gap: 37px;
             width: 90%;
             margin: 20px auto;
             background: white;
@@ -103,99 +107,188 @@
             color: #f4922c;
             
         }
+        .filter {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    margin: 20px auto;
+    font-size: 16px;
+}
+
+.filter form fieldset {
+    border: none;
+    padding: 0;
+}
+
+.filter form legend {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.filter form label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.filter form label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+#category {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter form input[type="time"],
+.filter form input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
+}
+
+.filter form input[type="time"]:focus,
+.filter form input[type="number"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.filter form input[type="submit"] {
+    background-color: #f4922c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter form input[type="submit"]:hover {
+    background-color: #e07b19;
+}
+
         
 
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="nav-container">
-            <div class="logo" style="height: 100px; width: 100px;">
-                <a href="/">
-                    <img src="https://primorecipe.com/wp-content/uploads/2024/12/s__1_-removebg-preview.png" alt="">
-                </a>
+    <div class="body">
+
+        <div class="header">
+            <div class="nav-container">
+                <div class="logo" style="height: 100px; width: 100px;">
+                    <a href="/">
+                        <img src="https://primorecipe.com/wp-content/uploads/2024/12/s__1_-removebg-preview.png" alt="">
+                    </a>
+                </div>
+                <nav class="navbar">
+                    <a href="/">home</a>
+                    <a href="/categories">Categories</a>
+                    {{if .IsLoggedIn}}
+                    <a href="/logout">Logout</a>
+                    {{else}}
+                    <a href="/register">Register</a>
+                    <a href="/login">Login</a>
+                    {{end}}
+                    <a href="/profile">Profile</a>
+                </nav>
             </div>
-            <nav class="navbar">
-                <a href="/profile">Profile</a>
-                <a href="/categories">Categories</a>
-                <a href="/register">Register</a>
-                <a href="/login">Login</a>
-            </nav>
-        </div>
-
-    </div>
-
-        <div class="filter">
-
-            <form action="/filterPosts" method="GET">
-                <fieldset>
-                    <legend>Filter Posts</legend>
-                                        <label for="category">Filter by Category:</label>
-                    <div id="category">
-                        <label>
-                            <input type="checkbox" name="category" value="tech">
-                            Technology
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="health">
-                            Health
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="travel">
-                            Travel
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="sports">
-                            Sports
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="gaming">
-                            Gaming
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="food">
-                            Food
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="science">
-                            Science
-                        </label>
-                        <label>
-                            <input type="checkbox" name="category" value="fashion">
-                            Fashion
-                        </label>
-                    </div>
-                    
-                    <label for="appt">Filter by Created Time:</label>
-                    <input type="time" id="appt" name="appt">
-            
-                    <label for="likes">Filter by Number of Likes:</label>
-                    <input type="number" id="likes" name="likes" min="0" placeholder="Enter minimum likes">
-                    
-                    <input type="submit" value="Filter">
-                </fieldset>
-            </form>
-            
-    </div>
-
-    <div class="container">
-        {{range .Posts}}
-        <div class="post">
-            <a href="/post?id={{.ID}}">{{.Title}}</a>
-            <div class="meta">
-                Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
-            </div>
-        </div>
-        {{end}}
-    </div>
-    <div class="add-post-container">
-        {{if .IsLoggedIn}}
-        <a href="/new-post">Add New Post</a>
-        {{else}}
-        <p class="not-regestred"><a href="http://localhost:8080/register">Register</a> to add a new posts.</p>
-        {{end}}
     
+        </div>
+        <div class="container">
+            <div class="posts">
+                {{range .Posts}}
+                <div class="post">
+                    <a href="/post?id={{.ID}}">{{.Title}}</a>
+                    <div class="meta">
+                        Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{ if .IsLoggedIn}}
+                <div class="filter">
+                    <form action="/filterPosts" method="GET">
+                        <fieldset>
+                            <legend>Filter Posts</legend>
+                                                <label for="category">Filter by Category:</label>
+                            <div id="category">
+                                <label>
+                                    <input type="checkbox" name="category" value="tech">
+                                    Technology
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="health">
+                                    Health
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="travel">
+                                    Travel
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="sports">
+                                    Sports
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="gaming">
+                                    Gaming
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="food">
+                                    Food
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="science">
+                                    Science
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="category" value="fashion">
+                                    Fashion
+                                </label>
+                            </div>
+                            
+                            <label for="appt">Filter by Created Time:</label>
+                            <input type="time" id="appt" name="appt">
+                    
+                            <label for="likes">Filter by Number of Likes:</label>
+                            <input type="number" id="likes" name="likes" min="0" placeholder="Enter minimum likes">
+                            
+                            <input type="submit" value="Filter">
+                        </fieldset>
+                    </form>
+                    
+                </div>
+            {{else}} 
+            <div class="notEligibleTofilter container">
+                <p>You are not logged in to filter posts. Please <a href="/login">login</a> or <a href="/register">register</a> to access this feature.</p>
+            </div>
+            {{ end }}
+        </div>
+        
+        <div class="add-post-container">
+            {{if .IsLoggedIn}}
+            <a href="/new-post">Add New Post</a>
+            {{else}}
+            <a href="/register">Register to add a new posts. </p></a> 
+            {{end}}
+        
+        </div>
+
     </div>
+    
     
 </body>
 </html>
