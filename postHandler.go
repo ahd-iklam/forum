@@ -64,27 +64,27 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var post Post
-	// Fetch the post details
+	// Fetch the post details and categories
 	err := db.QueryRow(`
         SELECT 
             posts.id, 
             posts.title, 
             posts.content, 
             posts.created_at, 
-            category.name AS category_name,
+            GROUP_CONCAT(category.name, ', ') AS categories, -- Concatenate all categories for the post
             users.username AS Username
         FROM posts
         LEFT JOIN post_category ON posts.id = post_category.post_id
         LEFT JOIN category ON post_category.catego_id = category.id
         INNER JOIN users ON posts.id_users = users.id
-        WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.CategoryName, &post.Username)
+        WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.Categories, &post.Username)
 
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
 
-	// fetching comments related to a specific post:y
+	// fetching comments related to a specific post
 	rows, err := db.Query(`
         SELECT comments.id, comments.content, comments.created_at, users.username,
         COALESCE((SELECT COUNT(*) FROM commentreaction WHERE commentreaction.comment_id = comments.id AND action = 'like'), 0) AS like_count,
@@ -124,7 +124,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		comments = append(comments, comment)
 	}
 
-	// check if the user is already logged in or not based on the cookie if the cookie is nil so there is no logged in user
+	// Check if the user is logged in based on the cookie
 	isLoggedIn := false
 	cookie, err := r.Cookie("userId")
 	if err == nil && cookie != nil {

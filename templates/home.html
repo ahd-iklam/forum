@@ -214,11 +214,12 @@
                 <div class="post">
                     <a href="/post?id={{.ID}}">{{.Title}}</a>
                     <div class="meta">
-                        Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Category: {{.CategoryName}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
+                        Posted on: {{.CreatedAt}} | Created by: {{.Username}} | Categories: {{.Categories}} | Comments: {{.CommentCount}} | Likes: {{.LikeCount}} | Dislikes: {{.DislikeCount}}
                     </div>
                 </div>
                 {{end}}
             </div>
+            
             {{ if .IsLoggedIn}}
                 <div class="filter">
                     <form action="/filterPosts" method="GET">

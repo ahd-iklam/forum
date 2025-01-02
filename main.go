@@ -17,7 +17,7 @@ type Post struct {
 	Content      string
 	CreatedAt    string
 	Username     string
-	CategoryName string
+	Categories   string // To store the concatenated categories
 	CommentCount int
 	LikeCount    int
 	DislikeCount int

@@ -22,7 +22,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
         posts.title, 
         posts.created_at, 
         users.username, 
-        category.name, 
+        GROUP_CONCAT(category.name, ', ') AS categories, 
         COALESCE(COUNT(comments.content), 0) AS comment_count,
         COALESCE(SUM(CASE WHEN postreaction.action = 'like' THEN 1 ELSE 0 END), 0) AS post_likes,
         COALESCE(SUM(CASE WHEN postreaction.action = 'dislike' THEN 1 ELSE 0 END), 0) AS post_dislikes
@@ -45,7 +45,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.CreatedAt, &post.Username, &post.CategoryName, &post.CommentCount, &post.LikeCount, &post.DislikeCount); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.CreatedAt, &post.Username, &post.Categories, &post.CommentCount, &post.LikeCount, &post.DislikeCount); err != nil {
 			log.Println("Error scanning post:", err)
 			continue
 		}
@@ -98,11 +98,11 @@ func addPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve form data
 	title := r.FormValue("title")
 	content := r.FormValue("content")
-	categoryName := r.FormValue("category") // Get the category name (not ID)
+	categories := r.Form["categories[]"] // Retrieve all selected categories as an array
 
-	// Ensure the category name is valid (not empty)
-	if categoryName == "" {
-		http.Error(w, "Category is required", http.StatusBadRequest)
+	// Validate the input
+	if title == "" || content == "" || len(categories) == 0 {
+		http.Error(w, "Title, content, and at least one category are required", http.StatusBadRequest)
 		return
 	}
 
@@ -128,35 +128,39 @@ func addPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insert the category if it does not exist
-	var categoryID int64
-	err = tx.QueryRow("SELECT id FROM category WHERE name = ?", categoryName).Scan(&categoryID)
-	if err != nil {
-		// If the category does not exist, create a new category
-		if err == sql.ErrNoRows {
-			result, err := tx.Exec("INSERT INTO category (name) VALUES (?)", categoryName)
-			if err != nil {
-				http.Error(w, "Error creating category", http.StatusInternalServerError)
-				return
-			}
+	// Process each selected category
+	for _, categoryName := range categories {
+		var categoryID int64
 
-			// Get the category ID of the newly inserted category
-			categoryID, err = result.LastInsertId()
-			if err != nil {
-				http.Error(w, "Error retrieving category ID", http.StatusInternalServerError)
+		// Check if the category already exists
+		err = tx.QueryRow("SELECT id FROM category WHERE name = ?", categoryName).Scan(&categoryID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// If the category does not exist, create a new category
+				result, err := tx.Exec("INSERT INTO category (name) VALUES (?)", categoryName)
+				if err != nil {
+					http.Error(w, "Error creating category", http.StatusInternalServerError)
+					return
+				}
+
+				// Get the ID of the newly inserted category
+				categoryID, err = result.LastInsertId()
+				if err != nil {
+					http.Error(w, "Error retrieving category ID", http.StatusInternalServerError)
+					return
+				}
+			} else {
+				http.Error(w, "Error fetching category", http.StatusInternalServerError)
 				return
 			}
-		} else {
-			http.Error(w, "Error fetching category", http.StatusInternalServerError)
+		}
+
+		// Insert the post-category relation into the post_category table
+		_, err = tx.Exec("INSERT INTO post_category (catego_id, post_id) VALUES (?, ?)", categoryID, postID)
+		if err != nil {
+			http.Error(w, "Error saving post category relation", http.StatusInternalServerError)
 			return
 		}
-	}
-
-	// Insert the post-category relation into the post_category table
-	_, err = tx.Exec("INSERT INTO post_category (catego_id, post_id) VALUES (?, ?)", categoryID, postID)
-	if err != nil {
-		http.Error(w, "Error saving post category relation", http.StatusInternalServerError)
-		return
 	}
 
 	// Commit the transaction
@@ -165,7 +169,7 @@ func addPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect to home page after successful post creation
+	// Redirect to the home page after successful post creation
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
